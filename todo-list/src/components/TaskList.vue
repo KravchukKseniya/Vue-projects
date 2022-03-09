@@ -13,6 +13,15 @@
 import TaskCard from './TaskCard'
 
 export default {
+    /** review:
+      Кране желательно чтобы компопнеты содержали свойство name.
+      Example:
+     */
+    // name: 'TaskList',
+    /** review:
+      У props есть два синтаксиса - массив и объект. Объект всегда предпочтительнее,
+      тк позволяет типизировать/валидировать/ставить дефолтное значение
+     */
     props: ['cards', 'title'],
     components: {
       TaskCard
