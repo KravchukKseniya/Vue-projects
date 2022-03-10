@@ -5,29 +5,23 @@
     </div>
 
     <add-task
-    @add-task="addNewTask">
+      @add-task="addNewTask">
     </add-task>
 
     <div class="tasks-area">
-      <task-list
-          :cards="tasks.filter(task => task.status === 'todo')"
-          :title="'todo'">
-      </task-list>
-      <task-list
-          :cards="tasks.filter(task => task.status === 'in_progress')"
-          :title="'in progress'">
-      </task-list>
-      <task-list
-          :cards="tasks.filter(task => task.status === 'done')"
-          :title="'done'">
-      </task-list>
+      <task-list v-for="status in statuses"
+       :cards="tasks.filter(task => task.status === status)"
+       :key="status"
+       :title="status"
+       @change-status="changeStatus"
+      ></task-list>
     </div>
   </div>
 </template>
 
 <script>
 import TaskList from './components/TaskList.vue';
-import AddTask from "@/components/AddTask";
+import AddTask from './components/AddTask';
 
 export default {
   name: 'App',
@@ -55,11 +49,6 @@ export default {
           status: 'todo'
         }
       ]
-    }
-  },
-  provide() {
-    return {
-      changeStatus: this.changeStatus
     }
   },
   methods: {
@@ -92,7 +81,6 @@ html, body {
 }
 
 #app {
-
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-align: center;

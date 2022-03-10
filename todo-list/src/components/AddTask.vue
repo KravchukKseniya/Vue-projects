@@ -9,12 +9,14 @@
 
 <script>
   export default {
+    name: 'AddTask',
     data() {
       return {
         newTask: '',
         showWarn: false
       }
     },
+    emits: ['add-task'],
     methods: {
       addTask() {
         if (this.newTask === '') {

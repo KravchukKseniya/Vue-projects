@@ -1,11 +1,12 @@
 <template>
   <div class="list">
     <h3>{{ title.toUpperCase() }} ({{ cards.length }})</h3>
-    <task-card
-      v-for="card in cards"
-      :key="card.id"
-      :card="card">
-    </task-card>
+      <task-card
+          v-for="card in cards"
+          :key="card.id"
+          :card="card"
+          @click="$emit('change-status', card.id)">
+      </task-card>
   </div>
 </template>
 
@@ -13,11 +14,16 @@
 import TaskCard from './TaskCard'
 
 export default {
-    props: ['cards', 'title'],
-    components: {
-      TaskCard
-    }
-  }
+  name: 'TaskList',
+  props: {
+    cards: Array,
+    title: String
+  },
+  components: {
+    TaskCard
+  },
+  emits: ['change-status']
+}
 </script>
 
 

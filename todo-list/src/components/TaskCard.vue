@@ -2,8 +2,7 @@
   <div class="card">
     <p> {{ card.text }} </p>
     <button
-        v-if="card.status !== 'done'"
-        @click="changeStatus(card.id)">
+        v-if="card.status !== 'done'">
       {{ statusForButton }}
     </button>
   </div>
@@ -11,28 +10,28 @@
 
 <script>
   export default {
-    inject: ['changeStatus'],
-    props: ['card'],
-    data() {
-      return {
-        currentStatus: this.card.status
+    name: 'TaskCard',
+    props: {
+      card: {
+        id: Number,
+        text: String,
+        status: String
       }
     },
     computed: {
       statusForButton() {
-        console.log(this.card.status === 'todo')
         if (this.card.status === 'todo') {
           return 'in progress'
         } else if (this.card.status === 'in_progress') {
           return 'done';
         }
-        return false;
+        return '';
       }
     }
   }
 </script>
 
-<style>
+<style scoped>
 .card {
   border: 1px solid black;
   border-radius: 5px;
