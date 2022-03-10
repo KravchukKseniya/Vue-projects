@@ -23,6 +23,10 @@
             this.showWarn = false;
           }, 10000)
         } else {
+          /** review:
+           если используешь emit, хорошим тоном считается добваить секцию emits в компонент в объектном синтаксисе
+           https://vuejs.org/guide/components/events.html#declaring-emitted-events
+          */
           this.$emit('add-task', this.newTask);
           this.showWarn = false;
           this.newTask = '';
