@@ -241,12 +241,18 @@ export default {
   methods: {
     updateTicker(tickerName, price) {
       this.tickers.filter(t => t.name === tickerName).forEach(t => {
+        if (t === this.selected) {
+          this.graph.push(price);
+        }
         t.price = price;
       })
     },
     formatPrice(price) {
       if (price === '-') {
         return '-';
+      }
+      if (price === undefined) {
+        return;
       }
       return price > 1 ? price.toFixed(2) : price.toPrecision(2);
     },
