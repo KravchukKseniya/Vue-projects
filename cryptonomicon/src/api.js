@@ -51,4 +51,13 @@ export const unsubscribeFromTicker = ticker => {
   unsubscribeFromTickerOnWs(ticker);
 }
 
+export async function loadCoinsList() {
+  const f = await fetch('https://min-api.cryptocompare.com/data/all/coinlist?summary=true');
+  const data = await f.json();
+  let coinList = [];
+  Object.values(data.Data).forEach(coin => coinList.push(coin.Symbol));
+  return coinList
+}
+
+
 

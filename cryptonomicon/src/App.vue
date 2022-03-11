@@ -1,5 +1,15 @@
 <template>
   <div class="container mx-auto flex flex-col items-center bg-gray-100 p-4">
+
+    <div
+        v-if="coinList.length === 0"
+        class="fixed w-100 h-100 opacity-80 bg-purple-800 inset-0 z-50 flex items-center justify-center">
+      <svg class="animate-spin -ml-1 mr-3 h-12 w-12 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+      </svg>
+    </div>
+
     <div class="container">
       <section>
         <div class="flex">
@@ -15,27 +25,28 @@
                   class="block w-full pr-10 border-gray-300 text-gray-900 focus:outline-none focus:ring-gray-500 focus:border-gray-500 sm:text-sm rounded-md"
                   placeholder="Например DOGE"/>
             </div>
-            <div class="flex bg-white shadow-md p-1 rounded-md shadow-md flex-wrap">
-            <span class="inline-flex items-center px-2 m-1 rounded-md text-xs font-medium bg-gray-300 text-gray-800 cursor-pointer">
-              BTC
-            </span>
-            <span class="inline-flex items-center px-2 m-1 rounded-md text-xs font-medium bg-gray-300 text-gray-800 cursor-pointer">
-              DOGE
-            </span>
-              <span class="inline-flex items-center px-2 m-1 rounded-md text-xs font-medium bg-gray-300 text-gray-800 cursor-pointer">
-              BCH
-            </span>
-              <span class="inline-flex items-center px-2 m-1 rounded-md text-xs font-medium bg-gray-300 text-gray-800 cursor-pointer">
-              CHD
+            <div
+                v-if="ticker"
+                class="flex bg-white shadow-md p-1 rounded-md shadow-md flex-wrap">
+            <span
+                v-for="(coin, idx) in sortCoin"
+                @click="addTickerFromAutocomplete(coin)"
+                :key="idx"
+                class="inline-flex items-center px-2 m-1 rounded-md text-xs font-medium bg-gray-300 text-gray-800 cursor-pointer">
+              {{ coin }}
             </span>
             </div>
-            <div class="text-sm text-red-600">Такой тикер уже добавлен</div>
+            <div
+                v-if="isMatchedNames"
+                class="text-sm text-red-600">Такой тикер уже добавлен</div>
           </div>
         </div>
         <button
             @click="addTicker"
+            :disabled="isMatchedNames"
             type="button"
-            class="my-4 inline-flex items-center py-2 px-4 border border-transparent shadow-sm text-sm leading-4 font-medium rounded-full text-white bg-gray-600 hover:bg-gray-700 transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500">
+            :class=" isMatchedNames ? 'bg-gray-600/[.5]' : 'hover:bg-gray-700 bg-gray-600'"
+            class="my-4 inline-flex items-center py-2 px-4 border border-transparent shadow-sm text-sm leading-4 font-medium rounded-full text-white transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500">
           <svg
               class="-ml-0.5 mr-2 h-6 w-6"
               xmlns="http://www.w3.org/2000/svg"
@@ -148,7 +159,7 @@
 
 <script>
 
-import {subscribeToTicker, unsubscribeFromTicker} from "@/api";
+import { subscribeToTicker, unsubscribeFromTicker, loadCoinsList } from "@/api";
 
 export default {
   name: 'App',
@@ -159,7 +170,8 @@ export default {
       selected: null,
       graph: [],
       page: 1,
-      filter: ''
+      filter: '',
+      coinList: []
     }
   },
   watch: {
@@ -202,7 +214,7 @@ export default {
       })
     }
 
-    // setInterval(this.updateTickers, 5000);
+    loadCoinsList().then(r => this.coinList = r)
   },
   computed: {
     startIndex() {
@@ -236,6 +248,15 @@ export default {
       return this.graph.map(
           price => 5 + ((price - minValue) * 95) / (maxValue - minValue)
       )
+    },
+    sortCoin() {
+      return this.coinList.filter(coin => coin.includes(this.ticker.toUpperCase())).slice(0, 4)
+    },
+    isMatchedNames() {
+      console.log(this.tickers.filter(t => t.name === this.ticker).length)
+      return Boolean(this.tickers.filter(t => t.name === this.ticker).length)
+      // this.tickers.indexOf(this.ticker)
+      // return false;
     }
   },
   methods: {
@@ -257,14 +278,20 @@ export default {
       return price > 1 ? price.toFixed(2) : price.toPrecision(2);
     },
     addTicker() {
-      const newTicker = { name: this.ticker, price: '-' };
-      this.tickers = [...this.tickers, newTicker];
-      this.filter = '';
-      subscribeToTicker(
-          newTicker.name,
-          (newPrice) => this.updateTicker(newTicker.name, newPrice)
-      );
-      this.ticker = '';
+      if (!this.isMatchedNames) {
+        const newTicker = { name: this.ticker, price: '-' };
+        this.tickers = [...this.tickers, newTicker];
+        this.filter = '';
+        subscribeToTicker(
+            newTicker.name,
+            (newPrice) => this.updateTicker(newTicker.name, newPrice)
+        );
+        this.ticker = '';
+      }
+    },
+    addTickerFromAutocomplete(coin) {
+      this.ticker = coin;
+      this.addTicker();
     },
     handleDelete(tick) {
       this.tickers = this.tickers.filter(t => t !== tick);
@@ -276,6 +303,7 @@ export default {
     select(ticker) {
       this.selected = ticker;
     }
+
   }
 }
 </script>
